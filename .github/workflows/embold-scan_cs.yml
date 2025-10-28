@@ -6,19 +6,20 @@ on:
     branches: [ "main" ]
 jobs:
   build:
-    runs-on: ubuntu-latest  # Use the standard, pre-configured GitHub Actions runner
+    runs-on: ubuntu-latest
+    container: ubuntu:20.04
     steps:
     - uses: actions/checkout@v4
     
-    # REMOVED: - name: Install dependencies (curl, wget, libssl1.1)
-    # The runner (ubuntu-latest) already has curl and wget installed.
-
+    - name: Install dependencies (curl, wget, libssl1.1)
+      run: |
+        apt-get update
+        apt-get install curl wget libssl1.1 -y 
+    
     # NEW STEP: Install Java (OpenJDK 11 is a common, stable version)
     - name: Install Java for Embold Scanner
       run: |
-        # Use apt on the runner to install Java
-        sudo apt-get update
-        sudo apt-get install openjdk-11-jre -y
+        apt-get install openjdk-11-jre -y
         
     - name: Setup .NET
       uses: actions/setup-dotnet@v4
@@ -27,7 +28,6 @@ jobs:
         
     - name: Embold Analyse
       run: |
-        # The following steps should now work as curl/tar are available
         curl https://v1.embold.io/nfs/CLI/browserstack-codequality-scanner.tar.gz -o browserstack-codequality-scanner-archive.tar.gz
         tar xvf browserstack-codequality-scanner-archive.tar.gz
         echo "Download and extract BrowserStack CQ Scanner done"
