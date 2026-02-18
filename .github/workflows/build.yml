@@ -14,7 +14,7 @@ jobs:
         uses: actions/setup-java@v4
         with:
           java-version: 17
-          distribution: 'zulu' # Alternative distribution options are available.
+          distribution: 'zulu'
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
@@ -36,12 +36,13 @@ jobs:
         shell: powershell
         run: |
           New-Item -Path ${{ runner.temp }}\scanner -ItemType Directory
-          dotnet tool update dotnet-sonarscanner --tool-path ${{ runner.temp }}\scanner
+          # FIX: Explicitly add NuGet.org and ignore failed private sources to prevent 401 errors
+          dotnet tool update dotnet-sonarscanner --tool-path ${{ runner.temp }}\scanner --add-source https://api.nuget.org/v3/index.json --ignore-failed-sources
       - name: Build and analyze
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_NEW }}
         shell: powershell
         run: |
-          ${{ runner.temp }}\scanner\dotnet-sonarscanner begin /k:"vcatest_PowerToys" /o:"vcatest" /d:sonar.token="${{ secrets.SONAR_NEW }}"
+          ${{ runner.temp }}\scanner\dotnet-sonarscanner begin /k:"vcatest_PowerToys" /o:"vcatest" /d:sonar.token="${{ secrets.SONAR_NEW }}" /d:sonar.host.url="https://sonarcloud.io"
           dotnet build
           ${{ runner.temp }}\scanner\dotnet-sonarscanner end /d:sonar.token="${{ secrets.SONAR_NEW }}"
