@@ -28,16 +28,16 @@ jobs:
       with:
         dotnet-version: 9.0.x
 
-    ## FIXED: Install the SonarScanner and add it to GITHUB_PATH
+    ## FIXED: CD into home directory to bypass repository's private nuget.config
     - name: Install SonarScanner
       run: |
+        cd ~
         dotnet tool install --global dotnet-sonarscanner
         echo "$HOME/.dotnet/tools" >> $GITHUB_PATH
         
     ## NEW: Start SonarScanner (Hook into build)
     - name: SonarScanner Begin
-      # Note: Replace "your_organization_key" with your actual SonarCloud organization key
-      run: dotnet sonarscanner begin /k:"vcatest_PowerToys" /o:"vcatest" /d:sonar.token="96776fa54a595ed6a86cfb00e41cf351b5af5c0e" /d:sonar.host.url="https://sonarcloud.io/"
+      run: dotnet sonarscanner begin /k:"vcatest_PowerToys" /o:"vcatest" /d:sonar.token="${{ secrets.SONAR_TOKEN }}" /d:sonar.host.url="https://sonarcloud.io/"
       
     ## NEW: Build the project (Required for Sonar analysis)
     - name: Build Project
@@ -45,7 +45,7 @@ jobs:
       
     ## NEW: End SonarScanner (Upload analysis to Sonar server)
     - name: SonarScanner End
-      run: dotnet sonarscanner end /d:sonar.token="96776fa54a595ed6a86cfb00e41cf351b5af5c0e"
+      run: dotnet sonarscanner end /d:sonar.token="${{ secrets.SONAR_TOKEN }}"
 
     # - name: Embold Analyse
     #   run: |
