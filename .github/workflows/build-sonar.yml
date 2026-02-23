@@ -12,6 +12,8 @@ jobs:
     container: ubuntu:20.04
     steps:
     - uses: actions/checkout@v4
+      with:
+        submodules: recursive # <-- ADD THIS to fetch missing project files
     
     - name: Install dependencies (curl, wget, libssl1.1)
       run: |
